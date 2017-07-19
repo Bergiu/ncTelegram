@@ -29,7 +29,7 @@ class Telegram_ui:
     def __init__(self, conf):
         self.lock_receiver = True
         self.conf = conf
-        
+
         self.boot_time = int(time.time())
         # Just shortcut for some configurations :
         self.DATE_FORMAT = self.conf['general']['date_format']

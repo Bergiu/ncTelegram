@@ -7,8 +7,7 @@ import time
 import urwid
 import re
 import urllib.request
-
-
+import pytg
 
 
 # widget used to print the message list
@@ -22,8 +21,25 @@ class MessageWidget(urwid.ListBox):
         self.separator_pos = -1
         self.updateLocked = False
         self.Telegram_ui = Telegram_ui
+        self.forbidden_msgs = []
+        self.load_forbidden_messages()
         self.get_history()
 
+
+    def load_forbidden_messages(self):
+        file_object = open("forbidden_messages.txt", "r")
+        for number in file_object.read().split("\n"):
+            if not number == "":
+                print("loaded the forbidden number: "+number)
+                self.forbidden_msgs.append(number)
+        file_object.close()
+
+    def appendNumberToForbiddenNumbers(self, number):
+        file_object = open("forbidden_messages.txt", "a")
+        file_object.write("\n"+number)
+        file_object.close()
+        print("finished appending number")
+        exit()
 
     def get_history(self):
         while self.updateLocked:
@@ -83,7 +99,7 @@ class MessageWidget(urwid.ListBox):
         if 'text' in msg:
             text = [msg['text']]
             urls = self.urlregex.findall(text[0])
-            
+
             if urls:
                 url = urls[0][0]
                 if not url.startswith('http'):
@@ -103,8 +119,8 @@ class MessageWidget(urwid.ListBox):
                         text = text + ['\n  ➜  ' + title]
                     except:
                         self.url_buffer[url] = ''
-                 
-                
+
+
         elif 'action' in msg:
             text = [(urwid.AttrSpec('light gray', ''), '➜ ' + msg['action']['type'].replace('_',' '))]
 
@@ -133,39 +149,47 @@ class MessageWidget(urwid.ListBox):
             else:
                 sender = msg['sender']['title']
             sender_id = msg['sender']['peer_id']
-            
 
         color = self.get_name_color(sender_id)
 
         if 'reply_id' in msg:
-            msg_reply = self.Telegram_ui.sender.message_get(msg['reply_id'])
-
-            if 'from' in msg_reply:
-                if 'first_name' in msg_reply['from']:
-                    sender_reply = msg_reply['from']['first_name']
+            try:
+                if msg["reply_id"] in self.forbidden_msgs:
+                    text = [(urwid.AttrSpec('light gray', ''), 'reply to ➜  '),
+                            (urwid.AttrSpec('light gray', '') , 'deleted msg'),
+                            '\n'] + text
                 else:
-                    sender_reply = msg_reply['from']['name']
-                sender_reply_id = msg_reply['from']['peer_id']
-            else:
-                if 'first_name' in msg_reply['sender']:
-                    sender_reply = msg_reply['sender']['first_name']
-                else:
-                    sender_reply = msg_reply['sender']['name']
-                sender_reply_id = msg_reply['sender']['peer_id']
+                    msg_reply = self.Telegram_ui.sender.message_get(msg['reply_id'])
 
-            color_reply = self.get_name_color(sender_reply_id)
-            if 'text' in msg_reply:
-                plus = ''
-                if len(msg_reply['text']) > 40:
-                    plus = '...'
-                text = [(urwid.AttrSpec('light gray', ''), 'reply to ➜  '),
-                        (urwid.AttrSpec(color_reply, '') , sender_reply),
-                        ': ' + msg_reply['text'][:40] + plus + '\n'] + text
-            else:
-                text = [(urwid.AttrSpec('light gray', ''), 'reply to ➜  '),
-                        (urwid.AttrSpec(color_reply, '') , sender_reply),
-                        '\n'] + text
+                    if 'from' in msg_reply:
+                        if 'first_name' in msg_reply['from']:
+                            sender_reply = msg_reply['from']['first_name']
+                        else:
+                            sender_reply = msg_reply['from']['name']
+                        sender_reply_id = msg_reply['from']['peer_id']
+                    else:
+                        if 'first_name' in msg_reply['sender']:
+                            sender_reply = msg_reply['sender']['first_name']
+                        else:
+                            sender_reply = msg_reply['sender']['name']
+                        sender_reply_id = msg_reply['sender']['peer_id']
 
+                    color_reply = self.get_name_color(sender_reply_id)
+                    if 'text' in msg_reply:
+                        plus = ''
+                        if len(msg_reply['text']) > 40:
+                            plus = '...'
+                        text = [(urwid.AttrSpec('light gray', ''), 'reply to ➜  '),
+                                (urwid.AttrSpec(color_reply, '') , sender_reply),
+                                ': ' + msg_reply['text'][:40] + plus + '\n'] + text
+                    else:
+                        text = [(urwid.AttrSpec('light gray', ''), 'reply to ➜  '),
+                                (urwid.AttrSpec(color_reply, '') , sender_reply),
+                                '\n'] + text
+
+            except pytg.exceptions.ConnectionError:
+                print("Replyto deleted message, appending number")
+                self.appendNumberToForbiddenNumbers(msg["reply_id"])
 
         if 'fwd_from' in msg:
             color_fwd = self.get_name_color(msg['fwd_from']['peer_id'])
@@ -179,14 +203,12 @@ class MessageWidget(urwid.ListBox):
             text = [(urwid.AttrSpec('light gray', ''), 'forwarded from '),
                     (urwid.AttrSpec(color_fwd, ''), fwd_from_name + '\n')] + text
 
-            
-
         cur_date = time.strftime('│ ' + self.Telegram_ui.DATE_FORMAT + ' │', time.localtime(date))
 
         if cur_date != self.prev_date[current_cmd]:
             fill = '─'*(len(cur_date) - 2)
             date_text = '┌' + fill + '┐\n' + cur_date + '\n└' + fill + '┘'
-            
+
             date_to_display = urwid.Text(('date', date_text), align='center')
             self.msg_list.insert(self.pos + 1, date_to_display)
             self.Telegram_ui.msg_archive[current_cmd].insert(self.pos +1, date_to_display)
