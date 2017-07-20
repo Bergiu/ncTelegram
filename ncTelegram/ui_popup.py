@@ -6,37 +6,14 @@ import urwid
 class PopUp(urwid.PopUpLauncher):
     def __init__(self, widgetbase, widgetpop):
         self.__super.__init__(widgetbase)
-        urwid.connect_signal(self.original_widget, 'click',
-            lambda button: self.open_pop_up())
+        urwid.connect_signal(self.original_widget, 'click', lambda button: self.open_pop_up()) # noqa
 
     def create_pop_up(self):
-        pop_up = PopUpDialog()
-        urwid.connect_signal(pop_up, 'close',
-            lambda button: self.close_pop_up())
+        pop_up = urwid.PopUpDialog()
+        urwid.connect_signal(pop_up, 'close', lambda button: self.close_pop_up()) # noqa
         return pop_up
 
     def get_pop_up_parameters(self):
-        return {'left':0, 'top':1, 'overlay_width':32, 'overlay_height':7}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        return {'left': 0, 'top': 1, 'overlay_width': 32, 'overlay_height': 7}
 
 # vim: ai ts=4 sw=4 et sts=4
