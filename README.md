@@ -29,6 +29,27 @@ OR
 $ pacaur -y nctelegram-git
 ```
 
+### Gentoo:
+
+Install dependencies:
+
+```
+$ emerge dev-python/pip
+$ emerge dev-python/urwid dev-python/psutil
+```
+
+Install ncTelegram through pip:
+```
+$ sudo pip install --user --upgrade https://github.com/Nanoseb/ncTelegram/archive/master.tar.gz
+$ sudo cp /root/.local/bin/nctelegram ~/.local/bin/
+```
+
+If you want notifications and inline images:
+
+```
+$ sudo dnf install libnotify caca-utils
+```
+
 ### Fedora:
 
 Install dependencies:
