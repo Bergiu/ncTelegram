@@ -9,7 +9,7 @@ A ncurses Telegram client developed in Python with the urwid library.
 ## Dependencies
 
 * [Telegram-cli](https://github.com/vysheng/tg)
-* [urwid](http://urwid.org)
+* [urwid==1.3](http://urwid.org)
 * [pytg](https://github.com/luckydonald/pytg)
 * python-psutil
 * libnotify (optional)
@@ -29,6 +29,27 @@ OR
 $ pacaur -y nctelegram-git
 ```
 
+### Gentoo:
+
+Install dependencies:
+
+```
+$ emerge dev-python/pip
+$ emerge dev-python/urwid dev-python/psutil
+```
+
+Install ncTelegram through pip:
+```
+$ sudo pip install --user --upgrade https://github.com/Nanoseb/ncTelegram/archive/master.tar.gz
+$ sudo cp /root/.local/bin/nctelegram ~/.local/bin/
+```
+
+If you want notifications and inline images:
+
+```
+$ sudo dnf install libnotify caca-utils
+```
+
 ### Fedora:
 
 Install dependencies:
@@ -39,7 +60,7 @@ $ sudo dnf install telegram-cli python3-urwid python3-psutil
 
 Install ncTelegram through pip:
 ```
-$ sudo pip3 install --upgrade https://github.com/Nanoseb/ncTelegram/archive/0.9.2.tar.gz
+$ sudo pip3 install --upgrade https://github.com/Nanoseb/ncTelegram/archive/master.tar.gz
 ```
 
 If you want notifications and inline images:
