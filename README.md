@@ -9,7 +9,7 @@ A ncurses Telegram client developed in Python with the urwid library.
 ## Dependencies
 
 * [Telegram-cli](https://github.com/vysheng/tg)
-* [urwid](http://urwid.org)
+* [urwid==1.3](http://urwid.org)
 * [pytg](https://github.com/luckydonald/pytg)
 * python-psutil
 * libnotify (optional)
