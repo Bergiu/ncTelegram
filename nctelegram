@@ -16,7 +16,7 @@ for connection in psutil.net_connections():
 #         sys.exit(1)
 
 
-confPriorityList = ['ncTelegram.conf', os.path.expanduser("~")+'/.ncTelegram.conf', '/etc/ncTelegram.conf']
+confPriorityList = [os.path.expanduser("~")+'/.ncTelegram.conf', 'ncTelegram.conf', '/etc/ncTelegram.conf']
 for conffile in confPriorityList:
     if os.path.isfile(conffile):
         break
