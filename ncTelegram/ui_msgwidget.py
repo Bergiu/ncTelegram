@@ -23,14 +23,24 @@ class MessageWidget(urwid.ListBox):
         self.updateLocked = False
         self.Telegram_ui = Telegram_ui
         self.forbidden_msgs = []
+        self.forbidden_users = []
         self.load_forbidden_messages()
+        self.load_forbidden_users()
         self.get_history()
+
+    def load_forbidden_users(self):
+        file_object = open("forbidden_users.txt", "r")
+        for user in file_object.read().split("\n"):
+            if not user == "":
+                print("loaded the forbidden users: " + user)
+                self.forbidden_users.append(user)
+        file_object.close()
 
     def load_forbidden_messages(self):
         file_object = open("forbidden_messages.txt", "r")
         for number in file_object.read().split("\n"):
             if not number == "":
-                print("loaded the forbidden number: "+number)
+                print("loaded the forbidden number: " + number)
                 self.forbidden_msgs.append(number)
         file_object.close()
 
@@ -132,17 +142,29 @@ class MessageWidget(urwid.ListBox):
                     text = text + ['\n'] + image
 
         if 'from' in msg:
+            if 'username' in msg['from']:
+                from_user = msg['from']['username']
+            else:
+                from_user = msg['from']['peer_id']
             if 'first_name' in msg['from']:
                 sender = msg['from']['first_name']
             else:
                 sender = msg['from']['title']
             sender_id = msg['from']['peer_id']
         else:
+            if 'username' in msg['sender']:
+                from_user = msg['sender']['username']
+            else:
+                from_user = msg['sender']['peer_id']
             if 'first_name' in msg['sender']:
                 sender = msg['sender']['first_name']
             else:
                 sender = msg['sender']['title']
             sender_id = msg['sender']['peer_id']
+        blocked = False
+        if from_user in self.forbidden_users:
+            blocked = True
+            blocked_msg = "BLOCKED USER"
 
         color = self.get_name_color(sender_id)
 
@@ -220,6 +242,8 @@ class MessageWidget(urwid.ListBox):
                                    ('separator', " │ ")])
 
         message_text = urwid.Text(text)
+        if blocked:
+            message_text = urwid.Text(blocked_msg)
         message_to_display = urwid.Columns([(size_name + 10, message_meta), message_text]) # noqa
         if at_begining:
             print_position = 0
