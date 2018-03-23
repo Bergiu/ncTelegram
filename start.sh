@@ -1,0 +1,2 @@
+killall telegram-cli
+./nctelegram
